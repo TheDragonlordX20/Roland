@@ -1,0 +1,396 @@
+#-------------------------------------------------------------------
+#                           Functions
+#-------------------------------------------------------------------
+import discord
+from random import randint
+import pickle
+
+#rt = 'Bot ID, Super Secret'
+
+TOKEN = rt
+
+#-------------------------------------------------------------------------
+#Channel IDs
+global white_list
+white_list = ['SUPER-RED-FALCON#0028','Dragonlord#9492',\
+              'Klustxr#1937','myelement#1699',\
+              'Paddyboy99#1065','Neoklis#0128','AJYoungGun#0607']
+
+#general_DVS 530528343666458663
+#general_Dragon 699785189697519701
+global channel_list
+channel_list = {'general':699785189697519701}
+
+#------------------------------------------------------------------------------
+#Data Storage
+def store_data(var,file):
+    f = open(file,'w')
+    f.truncate(0)
+    f.close()
+    f = open(file,'wb')
+    pickle.dump(var, f)
+    f.close()
+
+def fetch_data(file):
+    f = open(file,'rb')
+    return (pickle.load(f))
+    f.close()
+
+def store_all():
+    store_data(hosts,'hosts.dat')
+    store_data(players,'players.dat')
+    store_data(text,'text.dat')
+    store_data(subs,'subs.dat')
+    store_data(size,'size.dat')
+    store_data(messages,'messages.dat')
+
+def fetch_all():
+    global hosts
+    hosts = fetch_data('hosts.dat')
+    global players
+    players = fetch_data('players.dat')
+    global text
+    text = fetch_data('text.dat')
+    global subs
+    subs = fetch_data('subs.dat')
+    global size
+    size = fetch_data('size.dat')
+    global messages
+    messages = fetch_data('messages.dat')
+
+#-------------------------------------------------------------------
+def first_run():
+    global hosts
+    hosts = {1:'free',2:'free',3:'free',4:'free',5:'free',\
+        6:'free',7:'free',8:'free',9:'free',10:'free',\
+        11:'free',12:'free',13:'free',14:'free',15:'free',\
+        16:'free',17:'free',18:'free',19:'free',20:'free'}
+    global players
+    players = {1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],\
+            11:[],12:[],13:[],14:[],15:[],16:[],17:[],18:[],19:[],20:[]}
+
+    global text
+    text = {1:'free',2:'free',3:'free',4:'free',5:'free',\
+        6:'free',7:'free',8:'free',9:'free',10:'free',\
+        11:'free',12:'free',13:'free',14:'free',15:'free',\
+        16:'free',17:'free',18:'free',19:'free',20:'free'}
+    global subs
+    subs = {1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],\
+        11:[],12:[],13:[],14:[],15:[],16:[],17:[],18:[],19:[],20:[]}
+    global size
+    size = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,\
+        11:0,12:0,13:0,14:0,15:0,16:0,17:0,18:0,19:0,20:0}
+    global messages
+    messages = {1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],\
+            11:[],12:[],13:[],14:[],15:[],16:[],17:[],18:[],19:[],20:[]}
+
+first_run()
+
+def assemble_message(number):
+    temp_list = text[number]
+    temp_players = ""
+    temp_p = players[number]
+    temp_subs = ""
+    temp_s = subs[number]
+                
+    count = 0
+    while count < len(temp_p):
+        temp_players = temp_players + "\n" + temp_p[count]
+        count = count + 1
+
+    count = 0
+    while count < len(temp_s):
+        temp_subs = temp_subs + "\n" + temp_s[count]
+        count = count + 1
+                
+    return(temp_list[0] + temp_list[1] + temp_players + temp_list[2] + temp_subs + temp_list[3])
+
+#----------------------------------------------------------------------------------------
+class MyClient(discord.Client):
+    async def on_ready(self):
+        print('Logged on as', self.user)
+
+    async def on_message(self, message):
+        # don't respond to ourselves
+        if message.author == self.user:
+            return
+
+#-------------------------------------------------------------------
+#                             Admin
+#-------------------------------------------------------------------
+
+        if message.content.startswith('+message') and str(message.author) == 'Dragonlord#9492':
+            message_ = message.content[9:]
+            channel = client.get_channel(channel_list['general'])
+            await channel.send(message_)
+
+        if message.content == '+update' and str(message.author) == 'Dragonlord#9492':
+            message_ = "Roland 4.0 Update:\n"\
+                       "Roland is back online now and will be working as normal, I also took the oportunity to do a rewrite of the code to try a new data storage system\n"\
+                       "\nFixes:"\
+                       "\nThe issue with the size command not working is fixed\n"\
+                       "The vaulted maps have been removed from the +map command leavng the 20 that are still in the game"\
+                       "\n\nUpcoming Addition:\n"\
+                       "I will be adding in a feature allowing Roland to use peoples playstation usernames in activity posts for ease of use"
+
+            channel = client.get_channel(channel_list['general'])
+            await channel.send(message_)
+            
+        if message.content == '+reset' and str(message.author) == 'Dragonlord#9492':
+            try:
+                fetch_all()
+            except:
+                await message.channel.send("No Previous")
+            first_run()
+            store_all()
+            await message.channel.send("Data Wiped")
+            
+#-------------------------------------------------------------------
+#                            Crucible
+#-------------------------------------------------------------------
+        if message.content == '+map':
+            selection = randint(1,20)
+            maps_list = {1:"Altar of Flame",2:"Distant Shore",\
+                3:"Endless Vale",4:"Javelin-4",\
+                5:"Midtown",6:"The Burnout",\
+                7:"The Dead Cliffs",8:"The Fortress",9:"Pacifica",\
+                10:"Radiant Cliffs",11:"Wormhaven",\
+                12:"Convergence",\
+                13:"Rusted Lands",14:"Fragment",15:"Twilight Gap",16:"Widow's Court",\
+                17:"The Anomaly",18:"Cauldron",19:"Exodus Blue",20:"Bannerfall"}
+            await message.channel.send(maps_list[selection])
+
+#vaulted: Emperer's Respite, Eternity, Legion's Gulch, Retribution, Vostok, Meltdown, Solitude, Citadel, Equinox, Firebase Echo, Gambler's Ruin,
+
+        if message.content == '+coinflip':
+            selection = randint(1,2)
+            list_ = {1:'Heads',2:'Tails'}
+            await message.channel.send(list_[selection])
+
+#-------------------------------------------------------------------
+#                        Activity Manager
+#-------------------------------------------------------------------
+#Hosts
+        if message.content.startswith('+launch'):
+            try:
+                fetch_all()
+
+                host_ = str(message.author)
+                size_ = int(message.content[7:8])
+                text_ = message.content[9:]
+
+                count = 1
+                while count < 21:
+                    count_ = count
+                    if hosts[count_] == 'free':
+                        hosts[count_] = host_
+                        size[count_] = size_
+
+                        message_b = "\n\nPlayers:\n" + host_ + " (Host)"
+                        message_c = "\n\nSubs:"
+                        message_d = "\n\nThis activity is in slot " + str(count) + " and is for " + str(size_) + " players"\
+                                "\nTo interact with this activity use the following commands:"\
+                                "\n+join" + str(count) + "   +sub" + str(count) + \
+                                "   +leave" + str(count) + "   +hostcommands"
+            
+                        global free_slot
+                        free_slot = count_
+            
+                        text[count_] = [text_,message_b,message_c,message_d]
+            
+                        
+                        message_ = await message.channel.send(text_+message_b+message_c+message_d)
+                        messages[count_] = message_.id
+
+                        count = 100
+                    else:
+                        count = count + 1
+                
+                store_all()
+            except Exception as e:
+                user = client.get_user(328213986602516494)
+                await user.send(e)
+                await message.channel.send("There was somthing wrong with that command")
+                
+        if message.content.startswith('+size'):
+            try:
+                fetch_all()
+                num = int(message.content[5:6])
+                size_ = int(message.content[7:])
+                host_ = str(message.author)
+
+                if host_ == hosts[num]:
+                    size[num] = size_
+                    await message.channel.send("Activity size has been updated")
+                else:
+                    await message.channel.send("You are not the host of that activity")
+                store_all()
+            except Exception as e:
+                user = client.get_user(328213986602516494)
+                await user.send(e)
+                await message.channel.send("There was somthing wrong with that command")
+
+        if message.content.startswith('+edit'):
+            try:
+                fetch_all()
+                num = int(message.content[5:6])
+                text_ = str(message.content[7:])
+                host_ = str(message.author)
+
+                if host_ == hosts[num] or host_ in white_list:
+                    temp_list = text[num]
+                    temp_list[0] = text_
+                    text[num] = temp_list
+                    full_message = (assemble_message(num))
+
+                    id_ = await message.channel.fetch_message(messages[num])
+                    await id_.edit(content=full_message)
+                    await message.channel.send("Activity description has been updated")
+
+                else:
+                    await message.channel.send("You are not listed as the host of that activity")
+                store_all()
+            except Exception as e:
+                user = client.get_user(328213986602516494)
+                await user.send(e)
+                await message.channel.send("There was somthing wrong with that command")
+
+        if message.content.startswith('+close'):
+            try:
+                fetch_all()
+                host_ = str(message.author)
+                num = int(message.content[6:])
+
+                if host_ == hosts[num] or host_ in white_list:
+        
+                    text[num] = 'free'
+                    size[num] = 0
+                    players[num] = []
+                    subs[num] = []
+                    hosts[num] = 'free'
+
+                    id_ = await message.channel.fetch_message(messages[num])
+                    await id_.delete()
+                    messages[num] = 0
+                    await message.channel.send("Activity number " + str(num) + " has been closed")
+                else:
+                    await message.channel.send("You are not listed as the host of that activity")
+                store_all()
+            except Exception as e:
+                user = client.get_user(328213986602516494)
+                await user.send(e)
+                await message.channel.send("There was somthing wrong with that command")
+#Player
+        if message.content.startswith('+join'):
+            try:
+                fetch_all()
+                num = int(message.content[5:])
+                player_ = str(message.author)
+
+                if player_ in players[num]:
+                    await message.channel.send("You're already signed up for that activity")
+                elif player_ in hosts[num]:
+                    await message.channel.send("You are the host of that activity")
+                else:
+                    if player_ in subs[num]:
+                        subs[num].remove(player_)
+        
+                    if len(players[num]) >= int(size[num])-1:
+                        await message.channel.send("That activity is full")
+                    else:
+                        players[num].append(player_)
+            
+                        id_ = await message.channel.fetch_message(messages[num])
+                        await id_.edit(content=assemble_message(num))
+                        await message.channel.send(player_ + " has been added to the actvity")
+                store_all()
+            except Exception as e:
+                user = client.get_user(328213986602516494)
+                await user.send(e)
+                await message.channel.send("There was somthing wrong with that command")
+                
+        if message.content.startswith('+sub'):
+            try:
+                fetch_all()
+                num = int(message.content[4:])
+                player_ = str(message.author)
+
+                if player_ in subs[num]:
+                    await message.channel.send("You're already a sub for that activity")
+                elif player_ in hosts[num]:
+                    await message.channel.send("You are the host of that activity")
+                else:
+                    if player_ in players[num]:
+                        players[num].remove(player_)
+                    subs[num].append(player_)        
+                
+                    id_ = await message.channel.fetch_message(messages[num])
+                    await id_.edit(content=assemble_message(num))
+                    await message.channel.send(player_ + " has been added to the actvity as a sub")
+                store_all()
+            except Exception as e:
+                user = client.get_user(328213986602516494)
+                await user.send(e)
+                await message.channel.send("There was somthing wrong with that command")
+                
+        if message.content.startswith('+leave'):
+            try:
+                fetch_all()
+                num = int(message.content[6:])
+                player_ = str(message.author)
+
+                if player_ in hosts[num]:
+                    await message.channel.send("You are the host of that activity")
+                elif player_ in players[num]:
+                    players[num].remove(player_)
+                    id_ = await message.channel.fetch_message(messages[num])
+                    await id_.edit(content=assemble_message(num))
+                    await message.channel.send("You have been removed from the activtiy")
+                elif player_ in subs[num]:
+                    subs[num].remove(player_)
+                    id_ = await message.channel.fetch_message(messages[num])
+                    await id_.edit(content=assemble_message(num))
+                    await message.channel.send("You have been removed from the activtiy")
+                else:
+                    await message.channel.send("You are not signed up for that activity")
+                store_all()
+            except Exception as e:
+                user = client.get_user(328213986602516494)
+                await user.send(e)
+                await message.channel.send("There was somthing wrong with that command")
+                
+        if message.content == '+activeposts':
+            try:
+                fetch_all()
+                count = 1
+                a = 0
+                message_t = ""
+                while count <= len(hosts):
+                    if hosts[count] != 'free':
+                        message_t = message_t + "\nSlot " + str(count) + ": " + hosts[count]
+                        a = 1
+                    count = count + 1
+                if a == 1:
+                    await message.channel.send(message_t)
+                else:
+                    await message.channel.send("All slots are currently free")
+                store_all()
+            except Exception as e:
+                user = client.get_user(328213986602516494)
+                await user.send(e)
+                await message.channel.send("There was somthing wrong with that command")    
+
+
+        if message.content == '+hostcommands':
+            await message.channel.send("Roland Activity Manager Commands:"\
+                               "\nFor all of these commands the activity number is written in place of '@'"\
+                               "\n\n+launch* $$$ - launches an activity with the number of participants in place of the * and the activity description in place of the $$$"\
+                               "\n+edit@ $$$ - Changes the description of the activity to somthing written in pllace of $$$"\
+                               "\n+size@ $ - Changes the size of the activity to an new one written in place of the $"\
+                               "\n+close@ - Closes the activity and deletes its post"\
+                               "\n+activeposts - Displays the slots currently in use in the activity manager"\
+                               "\n+hostcommands - Displays this message")
+            
+
+client = MyClient()
+client.run(TOKEN)
